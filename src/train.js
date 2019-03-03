@@ -1,6 +1,7 @@
 
 const fs = require('fs');
 const synaptic = require('synaptic'); // this line is not needed in the browser
+let hyperparameters = require('/opt/ml/input/config/hyperparameters.json')
 
 const out = (number) => {
   switch (number) {
@@ -42,14 +43,15 @@ fs.readdir(trainFolder, (err, files) => {
   }
 
   process.stdout.write("Now we learn\n");
+  process.stdout.write(JSON.stringify(hyperparameters, null, 2) + "\n")
+
   trainer.train(trainSet, {
-    rate: 0.2,
-    //iterations: 80,
-    iterations: 1,
-    error: 0.05,
-    shuffle: true,
-    log: 1,
-    cost: synaptic.Trainer.cost.CROSS_ENTROPY
+    rate: hyperparameters.rate,
+    iterations: hyperparameters.iterations,
+    error: hyperparameters.error,
+    shuffle: Boolean(hyperparameters.shuffle),
+    log: hyperparameters.log,
+    cost: synaptic.Trainer.cost[hyperparameters.cost],
   });
 
   process.stdout.write("Learning complete...\n");

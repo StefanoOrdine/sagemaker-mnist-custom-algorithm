@@ -4,6 +4,7 @@ services:
     build: .
     volumes:
       - ./img-train:/opt/ml/input/data/train
+      - ./hyperparameters.json:/opt/ml/input/config/hyperparameters.json
       - ./network.json:/opt/ml/model/network.json
       - .:/data
     ports:
