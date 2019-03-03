@@ -1,0 +1,12 @@
+FROM node:10.11-alpine
+
+WORKDIR "/data"
+
+EXPOSE 8080
+
+ADD package.json package.json
+ADD node_modules node_modules
+ADD ./src src
+
+ENTRYPOINT ["npm", "run"]
+

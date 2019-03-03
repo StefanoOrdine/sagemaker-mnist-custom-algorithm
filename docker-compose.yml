@@ -1,0 +1,10 @@
+version: '3'
+services:
+  web:
+    build: .
+    volumes:
+      - ./network.json:/opt/ml/model/network.json
+      - .:/data
+    ports:
+      - 8080:8080
+    command: serve
