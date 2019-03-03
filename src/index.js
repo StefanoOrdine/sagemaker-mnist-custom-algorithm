@@ -2,7 +2,7 @@
 const synaptic = require('synaptic');
 
 const express = require('express')
-const fileUpload = require('express-fileupload')
+const bodyParser = require('body-parser')
 
 // loaded at position by sagemaker
 const data = require('/opt/ml/model/network.json');
@@ -13,16 +13,12 @@ const app = express()
 
 const conv = (arr) => arr.indexOf(Math.max(...arr));
 
-app.use(fileUpload());
+app.use(bodyParser.raw({ type: 'application/x-www-form-urlencoded' }))
 
 app.get('/ping', (req, res) => res.send(''))
 app.post('/invocations', (req, res) => {
-  if (!req.files || Object.keys(req.files).length == 0) {
-    return res.status(400).json('No files were uploaded.');
-  }
 
-  let input = req.files[Object.keys(req.files).pop()].data
-      .map((intensity) => intensity/255);
+  let input = req.body.map((intensity) => intensity/255);
 
   let result = network.activate(input);
   let converted = conv(result);
