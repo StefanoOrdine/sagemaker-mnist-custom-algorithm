@@ -3,6 +3,7 @@ services:
   web:
     build: .
     volumes:
+      - ./img-train:/opt/ml/input/data/train
       - ./network.json:/opt/ml/model/network.json
       - .:/data
     ports:

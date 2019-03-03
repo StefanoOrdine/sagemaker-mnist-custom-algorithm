@@ -21,7 +21,8 @@ app.post('/invocations', (req, res) => {
     return res.status(400).json('No files were uploaded.');
   }
 
-  let input = req.files[Object.keys(req.files).pop()].data.map(i => parseInt(i)/255)
+  let input = req.files[Object.keys(req.files).pop()].data
+      .map((intensity) => intensity/255);
 
   let result = network.activate(input);
   let converted = conv(result);
