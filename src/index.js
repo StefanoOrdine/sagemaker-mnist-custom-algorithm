@@ -20,7 +20,8 @@ app.use(bodyParser.raw({ type: 'application/x-www-form-urlencoded' }))
 app.get('/ping', (req, res) => res.send(''))
 app.post('/invocations', (req, res) => {
 
-  let input = req.body.map((intensity) => intensity/255);
+  let input = req.body
+  console.log(input.length)
 
   let result = network.activate(input);
   let converted = conv(result);
