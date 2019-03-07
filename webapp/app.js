@@ -32,7 +32,7 @@ var paint;
 function sendData() {
   var data = context.getImageData(0, 0, context.canvas.width, context.canvas.height).data
 
-  data = R.map(R.compose(R.ifElse(R.lt(0), R.always(255), R.identity), R.sum), R.splitEvery(4, data))
+  data = R.map(R.compose(R.ifElse(R.lt(0), R.flip(R.divide)(3), R.identity), R.sum, R.slice(0,3)), R.splitEvery(4, data))
 
   data = new Uint8Array(data);
 
@@ -45,7 +45,6 @@ function sendData() {
     processData:false,
     success: function(data) {
       //data = JSON.parse(data)
-      console.log(data)
 
       $('#result').html(data.output)
     },
@@ -72,7 +71,7 @@ function redraw(){
   //context.setTransform(1, 0, 0, 1, 0, 0);
   context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
 
-  context.strokeStyle = "#000";
+  context.strokeStyle = "#fff";
   context.lineJoin = "round";
   context.lineWidth = 2.4;
 

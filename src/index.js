@@ -21,7 +21,6 @@ app.get('/ping', (req, res) => res.send(''))
 app.post('/invocations', (req, res) => {
 
   let input = req.body
-  console.log(input.length)
 
   let result = network.activate(input);
   let converted = conv(result);
