@@ -76,7 +76,7 @@ function redraw(){
 
   context.strokeStyle = "#fff";
   context.lineJoin = "round";
-  context.lineWidth = 2.4;
+  context.lineWidth = 2.8;
 
   for(var i=0; i < clickX.length; i++) {
     context.beginPath();
