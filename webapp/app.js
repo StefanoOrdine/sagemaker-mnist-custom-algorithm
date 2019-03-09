@@ -1,6 +1,6 @@
-let context = document.getElementById('canvas').getContext("2d");
+let context = document.getElementById('big').getContext("2d");
 
-$('#canvas').mousedown(function(e){
+$('#big').mousedown(function(e){
   var mouseX = e.pageX - this.offsetLeft;
   var mouseY = e.pageY - this.offsetTop;
 
@@ -9,18 +9,18 @@ $('#canvas').mousedown(function(e){
   redraw();
 });
 
-$('#canvas').mousemove(function(e){
+$('#big').mousemove(function(e){
   if(paint){
     addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
     redraw();
   }
 });
 
-$('#canvas').mouseup(function(e){
+$('#big').mouseup(function(e){
   paint = false;
 });
 
-$('#canvas').mouseleave(function(e){
+$('#big').mouseleave(function(e){
   paint = false;
 });
 
@@ -31,11 +31,24 @@ var paint;
 
 function sendData() {
   var data = context.getImageData(0, 0, context.canvas.width, context.canvas.height).data
-
   data = R.map(R.compose(R.ifElse(R.lt(0), R.flip(R.divide)(3), R.identity), R.sum, R.slice(0,3)), R.splitEvery(4, data))
 
-  console.log(data)
+  data = R.compose(resize, R.splitEvery(280))(data)
 
+  let small_context = document.getElementById('canvas').getContext("2d");
+  small_context.clearRect(0, 0, 28, 28); // Clears the canvas
+  small_context.fillStyle = "#FFF";
+
+  for (let i=0; i<28; i++) {
+    for (let j=0; j<28; j++) {
+      if (data[i][j] > 0) {
+        small_context.fillRect(j,i,1,1);
+      }
+    }
+  }
+
+  data = small_context.getImageData(0, 0, 28, 28).data
+  data = R.map(R.compose(R.ifElse(R.lt(0), R.flip(R.divide)(3), R.identity), R.sum, R.slice(0,3)), R.splitEvery(4, data))
 
   data = new Uint8Array(data);
 
@@ -76,7 +89,7 @@ function redraw(){
 
   context.strokeStyle = "#fff";
   context.lineJoin = "round";
-  context.lineWidth = 2.8;
+  context.lineWidth = 30;
 
   for(var i=0; i < clickX.length; i++) {
     context.beginPath();
@@ -99,6 +112,7 @@ function handleImage(e){
   let canvas = document.getElementById('canvas');
   let ctx = canvas.getContext('2d');
   ctx.fillStyle = "#FFF";
+  ctx.clearRect(0,0,28,28)
 
   var reader = new FileReader();
   reader.onload = function(event){
@@ -111,7 +125,72 @@ function handleImage(e){
         }
       }
     }
+
+    let data = ctx.getImageData(0, 0, 28, 28).data
+    data = R.map(R.compose(R.ifElse(R.lt(0), R.flip(R.divide)(3), R.identity), R.sum, R.slice(0,3)), R.splitEvery(4, data))
+
+    data = new Uint8Array(data);
+
+    $.ajax({
+      url: 'http://localhost:8080/invocations',
+      type: 'POST',
+      dataType:'json',
+      contentType: 'application/x-www-form-urlencoded',
+      data: data,
+      processData:false,
+      success: function(data) {
+        //data = JSON.parse(data)
+
+        $('#result').html(data.output)
+      },
+      error: console.error
+    });
   }
   reader.readAsDataURL(e.target.files[0]);
 }
 
+function resize(input) {
+  let width = 280;
+  let height = 280;
+
+  let thumbwidth = 28;
+  let thumbheight = 28;
+
+  let output = R.repeat(null, 28).map(i => R.repeat(0, 28))
+
+  let xscale = (thumbwidth+0.0) / width;
+  let yscale = (thumbheight+0.0) / height;
+  let threshold = 0.5 / (xscale * yscale);
+  let yend = 0.0;
+
+  for (let f = 0; f < thumbheight; f++) // y on output
+  {
+      let ystart = yend;
+      yend = (f + 1) / yscale;
+      if (yend >= height) yend = height - 0.000001;
+      let xend = 0.0;
+      for (let g = 0; g < thumbwidth; g++) // x on output
+      {
+          let xstart = xend;
+          xend = (g + 1) / xscale;
+          if (xend >= width) xend = width - 0.000001;
+          let sum = 0.0;
+          for (let y = parseInt(ystart); y <= parseInt(yend); ++y)
+          {
+              let yportion = 1.0;
+              if (y == parseInt(ystart)) yportion -= ystart - y;
+              if (y == parseInt(yend)) yportion -= y+1 - yend;
+              for (let x = parseInt(xstart); x <= parseInt(xend); ++x)
+              {
+                  let xportion = 1.0;
+                  if (x == parseInt(xstart)) xportion -= xstart - x;
+                  if (x == parseInt(xend)) xportion -= x+1 - xend;
+                  sum += input[y][x] * yportion * xportion;
+              }
+          }
+          output[f][g] = (sum > threshold) ? 1 : 0;
+      }
+  }
+
+  return output
+}

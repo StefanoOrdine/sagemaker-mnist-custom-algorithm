@@ -20,7 +20,6 @@ app.post('/invocations', (req, res) => {
     ContentType: 'application/x-www-form-urlencoded',
   };
   sagemakerruntime.invokeEndpoint(params, function(err, data) {
-    console.log()
     if (err) res.status(500).json(err)
     else     res.status(200).send(data.Body.toString())
   });
