@@ -47,7 +47,12 @@ function sendData() {
     }
   }
 
-  data = small_context.getImageData(0, 0, 28, 28).data
+  let image = small_context.getImageData(0, 0, 28, 28)
+  let com = center_of_mass(28,28,image)
+
+  $('#center_of_mass').html(`x: ${com[0]} y: ${com[1]}`)
+
+  data = image.data
   data = R.map(R.compose(R.ifElse(R.lt(0), R.flip(R.divide)(3), R.identity), R.sum, R.slice(0,3)), R.splitEvery(4, data))
 
   data = new Uint8Array(data);
@@ -126,7 +131,12 @@ function handleImage(e){
       }
     }
 
-    let data = ctx.getImageData(0, 0, 28, 28).data
+    let image = ctx.getImageData(0, 0, 28, 28)
+    let data = image.data
+    let com = center_of_mass(28,28,image)
+
+    $('#center_of_mass').html(`x: ${com[0]} y: ${com[1]}`)
+
     data = R.map(R.compose(R.ifElse(R.lt(0), R.flip(R.divide)(3), R.identity), R.sum, R.slice(0,3)), R.splitEvery(4, data))
 
     data = new Uint8Array(data);
@@ -193,4 +203,43 @@ function resize(input) {
   }
 
   return output
+}
+
+function center_of_mass(width, height, data_a)
+{
+  //Calculate center of mass
+  var x_coords = [];
+  var y_coords = [];
+
+  for (let i = 0; i < data_a.data.length; i+=4)
+  {
+    //for each pixel
+    var x_pos = (i/4) % width;
+    var y_pos = (i/4) / height;
+    var r = data_a.data[i];
+    var g = data_a.data[i+1];
+    var b = data_a.data[i+2];
+    if (r == 255 && g == 255 && b == 255)
+    {
+      //red pixel
+      x_coords.push(x_pos);
+      y_coords.push(y_pos);
+    }
+  }
+
+  //Average of x_coords and y_coords
+  var center_x = 0;
+  var center_y = 0;
+
+  for (let i = 0; i < x_coords.length; i++) {
+    center_x += x_coords[i];
+  }
+  center_x = Math.ceil(center_x / x_coords.length);
+
+  for (let i = 0; i < y_coords.length; i++) {
+    center_y += y_coords[i];
+  }
+  center_y = Math.ceil(center_y / y_coords.length);
+
+  return [center_x, center_y];
 }

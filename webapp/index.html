@@ -8,12 +8,17 @@
         <canvas id="canvas" width="28" height="28" style="border: 1px solid #000; background: #000;"></canvas>
 
         <h3 id="result"></h3>
+        <h3 id="center_of_mass"></h3>
 
-        <button id="clear" onclick="clearCanvas()">Clear</button>
-        <button id="send" onclick="sendData()">Send</button>
+        <p>
+            <button id="clear" onclick="clearCanvas()">Clear</button>
+            <button id="send" onclick="sendData()">Send</button>
+        </p>
 
-        <label>Image File:</label><br/>
-        <input type="file" id="imageLoader" name="imageLoader"/>
+        <p>
+            <label>Image File:</label><br/>
+            <input type="file" id="imageLoader" name="imageLoader"/>
+        </p>
 
         <script src="node_modules/jquery/dist/jquery.min.js" type="text/javascript"></script>
         <script src="node_modules/ramda/dist/ramda.min.js" type="text/javascript"></script>
